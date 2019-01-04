@@ -1,0 +1,20 @@
+input[34] noc_data
+
+output[32] ub_data
+output read
+
+
+//ideja je da se sklop ponasa kao filtar koji instantno propusta nadopunjene podatke
+
+
+//ako na unboxer dodje header, propustamo samo zadnji bit koji odredjuje je li operacija bila read ili write
+if ([INPUT]noc_data[33-32] == '10') {
+	
+	[OUTPUT]read <= [INPUT]noc_data[0]
+}
+
+//ako na unboxer dodje tail, propustamo sva 32 bita payload-a
+else if ([INPUT]noc_data[33-32] == '01') {
+	
+	[OUTPUT]ub_data <= [INPUT]noc_data[31-0]
+}

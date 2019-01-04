@@ -1,0 +1,164 @@
+enum {IDLE, RREQ1, RREQ2, WREQ1, WREQ2, WREQ3} state
+
+input arready
+input awready
+input wready
+
+input[32] addr
+input[32] data
+input[4] pov_addr
+input read
+
+input is_valid
+
+output[#vc] is_on_off
+output[#vc] is_allocatable
+
+output[32] araddr
+output arvalid
+
+output[32] awaddr
+output awvalid
+
+output[32] wdata
+output wvalid
+
+output[4] pov_addr_buffer
+
+registar[32] reg_addr
+registar[32] reg_data
+registar[4] reg_pov_addr
+
+lokalna varijabla state
+
+
+//logika se stalno vrti u petlji, naredbe u istim blokovima se izvode istovremeno (unutar istog takta)
+
+
+if (state == IDLE){
+	
+	//prekid slanja prema AXI strani iz prijasnjeg stanja
+	[OUTPUT]arvalid <= '0'
+	[OUTPUT]awvalid <= '0'
+	[OUTPUT]wvalid <= '0'
+	
+	//javljamo da je virtualni kanal 1 (ujedno i jedini) dostupan
+	[OUTPUT]is_allocatable <= '00000001'
+	[OUTPUT]is_on_off <= '00000001'
+	
+	if ([INPUT]is_valid == '1' && [INPUT]read == '0') {
+		
+		//virtualni kanal 1 je zauzet
+		[OUTPUT]is_allocatable <= '00000000'
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//sprememao povratnu adresu u unutarnji registar
+		[REGISTAR]reg_pov_addr <= [INPUT]pov_addr
+		
+		//prijelaz u sljedece stanje za operaciju pisanja
+		state = WREQ1
+	}
+	
+	if ([INPUT]is_valid == '1' && [INPUT]read == '1') {
+		
+		//virtualni kanal 1 je zauzet
+		[OUTPUT]is_allocatable <= '00000000'
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//sprememao povratnu adresu u unutarnji registar
+		[REGISTAR]reg_pov_addr <= [INPUT]pov_addr
+		
+		//prijelaz u sljedece stanje za operaciju citanja
+		state = RREQ1
+	}
+}
+
+if (state == RREQ1){
+	
+	//virtualni kanal spreman primiti flit
+	[OUTPUT]is_on_off <= '00000001'
+	
+	if ([INPUT]is_valid == '1') {
+		
+		//spremamo adresu citanja u unutarnji resgistar
+		[REGISTAR]reg_addr <= [INPUT]addr
+		
+		//virtualni kanal 1 nije dostupan
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//Prijelaz u sljedece stanje
+		state = RREQ2
+	}
+}
+
+if (state == RREQ2){
+	
+	if ([INPUT]arready == '1') {
+		
+		//povratnu adresu saljemo u vanjski resgistar (buffer)
+		[OUTPUT]pov_addr_buffer <= [registar]reg_pov_addr
+		
+		//predajemo adresu citanja AXI strani
+		[OUTPUT]araddr <= [REGISTAR]reg_addr
+		[OUTPUT]arvalid <= '1'
+		
+		//povratak u pocetno stanje
+		state = IDLE
+	}
+}
+
+if (state == WREQ1){
+	
+	//virtualni kanal spreman primiti flit
+	[OUTPUT]is_on_off <= '00000001'
+	
+	if ([INPUT]is_valid == '1') {
+		
+		//spremamo adresu pisanja u unutarnji resgistar
+		[REGISTAR]reg_addr <= [INPUT]addr
+		
+		//virtualni kanal 1 nije dostupan
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//Prijelaz u sljedece stanje
+		state = WREQ2
+	}
+}
+
+if (state == WREQ2){
+	
+	//virtualni kanal spreman primiti flit
+	[OUTPUT]is_on_off <= '00000001'
+	
+	if ([INPUT]is_valid == '1') {
+		
+		//spremamo podatke za upis u unutarnji registar
+		[REGISTAR]reg_data <= [INPUT]wdata
+		
+		//virtualni kanal 1 nije dostupan
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//Prijelaz u sljedece stanje
+		state = WREQ3
+	}
+}
+
+if (state == WREQ3){
+	
+	if ([INPUT]awready == 1 && [INPUT]wready == 1) {
+		
+		//povratnu adresu saljemo u vanjski resgistar (buffer)
+		[OUTPUT]pov_addr_buffer <= [registar]reg_pov_addr
+		
+		//predajemo adresu pisanja AXI strani
+		[OUTPUT]awaddr <= [REGISTAR]reg_addr
+		[OUTPUT]arvalid <= '1'
+		
+		//predajemo podatak za upis AXI strani
+		[OUTPUT]wdata <= [REGISTAR]reg_data
+		[OUTPUT]wvalid <= '1'
+		
+		//povratak u pocetno stanje
+		state = IDLE
+	}
+}

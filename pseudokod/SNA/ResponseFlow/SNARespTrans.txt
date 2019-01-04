@@ -1,0 +1,96 @@
+enum {IDLE, HEADER, TAIL} state
+
+input[34] header
+input[34] tail
+
+input rvalid
+input bvalid
+
+input[#vc] is_allocatable
+input[#vc] is_on_off
+
+output[34] noc_data
+output is_valid
+
+output rready
+output bready
+
+registar[34] reg_header
+registar[34] reg_tail
+registar[#vc] reg_alloc
+
+lokalna varijabla state
+
+
+//logika se stalno vrti u petlji, naredbe u istim blokovima se izvode istovremeno (unutar istog takta)
+
+
+if (state == IDLE) {
+	
+	//prekidamo slanje iz proslog stanja
+	[OUTPUT]is_valid = '0'
+	
+	if ([INPUT]rvalid == '1' && [INPUT]is_allocatable != '0') {
+		
+		//rukovanje s AXI stranom
+		[OUTPUT]rready <= '1'
+		
+		//spremamo podatke s flit buildera u lokalne registre
+		[REGISTAR]reg_header <= [INPUT]header
+		[REGISTAR]reg_tail <= [INPUT]tail
+		
+		//spremamo alocirani virtualni kanal
+		[REGISTAR]reg_alloc <= [INPUT]is_allocatable
+		
+		state = HEADER
+	}
+	
+	if ([INPUT]bvalid == '1' && [INPUT]is_allocatable != '0') {
+		
+		//rukovanje s AXI stranom
+		[OUTPUT]bready <= '1'
+		
+		//spremamo podatke s flit buildera u lokalne registre
+		[REGISTAR]reg_header <= [INPUT]header
+		[REGISTAR]reg_tail <= [INPUT]tail
+		
+		//spremamo alocirani virtualni kanal
+		[REGISTAR]reg_alloc <= [INPUT]is_allocatable
+		
+		state = HEADER
+	}
+}
+
+if (state == HEADER) {
+	
+	//prekidamo rukovanje iz proslog stanja
+	[OUTPUT]rready <= '0'
+	[OUTPUT]bready <= '0'
+	
+	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+		
+		//saljemo flit na router
+		[OUTPUT]noc_data <= [REGISTAR]reg_header
+		[OUTPUT]is_valid <= '1'
+		
+		//prijelaz u sljedece stanje
+		state = TAIL
+	}
+}
+
+if (state == TAIL) {
+	
+	//prekidamo slanje iz proslog stanja
+	[OUTPUT]is_valid <= '0'
+	
+	
+	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+		
+		//saljemo flit na router
+		[OUTPUT]noc_data <= [REGISTAR]reg_tail
+		[OUTPUT]is_valid <= '1'
+		
+		//prijelaz u sljedece stanje
+		state = IDLE
+	}
+}
