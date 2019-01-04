@@ -1,0 +1,120 @@
+enum {IDLE, WRESP1, WRESP2, RRESP1, RRESP2} state
+
+input rready
+input bready
+input is_valid
+
+input read
+input[32] ub_data
+
+output[#vc] is_allocatable
+output[#vc] is_on_off
+
+output[32] rdata
+output rvalid
+
+output[32] bresp
+output bvalid
+
+registar[32] data
+
+lokalna varijabla state
+
+
+//logika se stalno vrti u petlji, naredbe u istim blokovima se izvode istovremeno (unutar istog takta)
+
+
+if (state == IDLE) {
+	
+	//prekid slanja prema AXI strani iz prijasnjeg stanja
+	[OUTPUT]bvalid <= '0'
+	[OUTPUT]rvalid <= '0'
+	
+	//javljamo da je virtualni kanal 1 (ujedno i jedini) dostupan
+	[OUTPUT]is_allocatable <= '00000001'
+	[OUTPUT]is_on_off <= '00000001'
+	
+	if ([INPUT]is_valid == '1' && [INPUT]read == '0') {
+		
+		//virtualni kanal 1 je zauzet
+		[OUTPUT]is_allocatable <= '00000000'
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//prijelaz u sljedece stanje za operaciju pisanja
+		state = WRESP1
+	}
+	
+	if ([INPUT]is_valid == '1' && [INPUT]read == '1') {
+		
+		//virtualni kanal 1 je zauzet
+		[OUTPUT]is_allocatable <= '00000000'
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//prijelaz u sljedece stanje za operaciju citanja
+		state = RRESP1
+	}
+}
+
+if (state == WRESP1) {
+	
+	//virtualni kanal 1 je spreman primiti flit
+	[OUTPUT]is_on_off <= '00000001'
+	
+	if ([INPUT]is_valid == '1') {
+		
+		//unboxane podatke spremamo u unutarnji registar
+		[REGISTAR]data <= [INPUT]ub_data
+		//virtualni kanal 1 je zauzet
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//prijelaz u sljedece stanje
+		state = WRESP2
+	}
+}
+
+if (state == WRESP2) {
+	
+	if ([INPUT]bready == '1') {
+		
+		//primljeni write response postavljamo na bresp 
+		[OUTPUT]bresp <= [REGISTAR]data
+		
+		//izvodimo rukovanje sa AXI stranom
+		[OUTPUT]bvalid <= '1'
+		
+		//povratak u stanje idle
+		state = IDLE
+	}
+}
+
+if (state == RRESP1) {
+	
+	//virtualni kanal 1 je spreman primiti flit
+	[OUTPUT]is_on_off <= '00000001'
+	
+	if ([INPUT]is_valid == '1') {
+		
+		//unboxane podatke spremamo u unutarnji registar
+		[REGISTAR]data <= [INPUT]ub_data
+		//virtualni kanal 1 je zauzet
+		[OUTPUT]is_on_off <= '00000000'
+		
+		//prijelaz u sljedece stanje
+		state = RRESP2
+	}
+}
+
+if (state == RRESP2) {
+	
+	if ([INPUT]rready == 1) {
+		
+		//primljeni procitani podatak postavljamo na rdata
+		[OUTPUT]rdata <= [REGISTAR]data
+		
+		//izvodimo rukovanje sa AXI stranom
+		[OUTPUT]rvalid <= '1'
+		
+		//povratak u stanje idle
+		state = IDLE
+	}
+}

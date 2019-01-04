@@ -1,0 +1,124 @@
+enum {IDLE, HEADER, BODY, TAIL} state
+
+input[34] header
+input[34] body
+input[34] tail
+
+input avalid
+input wvalid
+input awrite
+
+input[#vc] is_allocatable
+input[#vc] is_on_off
+
+output aready
+output wready
+
+output[34] noc_data
+output is_valid
+
+registar[34] reg_header
+registar[34] reg_body
+registar[34] reg_tail
+registar[#vc] reg_alloc
+
+lokalna varijabla state
+lokalna varijabla write
+
+
+//logika se stalno vrti u petlji, naredbe u istim blokovima se izvode istovremeno (unutar istog takta)
+
+
+if (state == IDLE) {
+	
+	[OUTPUT]is_valid <= '0'
+	
+	//ako je operacija citanje, AXI strana je spremna za rukovanje i router ima slobodan virtualni kanal
+	if ([INPUT]awrite == '0' && [INPUT]avalid == '1' && [INPUT]is_allocatable != '0') {
+		
+		//proces AXI rukovanja za operaciju citanja
+		[OUTPUT]aready <= '1'
+		
+		//spremamo flitove iz flit buildera u unutarnje registre
+		[REGISTAR]reg_header <= [INPUT]header
+		[REGISTAR]reg_tail <= [INPUT]tail
+		[REGISTAR]reg_alloc <= [input]is_allocatable
+		
+		//prijelaz u sljedece stanje
+		write = 0
+		state = HEADER
+	}
+	
+	//ako je operacija pisanje
+	if ([INPUT]awrite == '1' && [INPUT]avalid == '1' && [INPUT]wvalid == '1' && [INPUT]is_allocatable != '0') {
+		
+		//proces AXI rukovanja za operaciju pisanja
+		[OUTPUT]aready <= '1'
+		[OUTPUT]wready <= '1'
+		
+		//spremamo flitove iz flit buildera u unutarnje registre
+		[REGISTAR]reg_header <= [INPUT]header
+		[REGISTAR]reg_body <= [INPUT]body
+		[REGISTAR]reg_tail <= [INPUT]tail
+		[REGISTAR]reg_alloc <= [input]is_allocatable
+		
+		//prijelaz u  sljedece stanje
+		write = 1
+		state = HEADER
+	}
+}
+
+if (state == HEADER) {
+	
+	//prekid rukovanja iz stanja idle
+	[OUTPUT]aready <= '0'
+	[OUTPUT]wready <= '0'
+	
+	//provjeravamo je li virtualni kanal na routeru koji prima ovu poruku spreman primiti flit
+	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+		
+		//slanje head flita na router
+		[OUTPUT]noc_data <= [REGISTAR]reg_header
+		[OUTPUT]is_valid <= '1'
+		
+		//ako je operacija citanje, prelazimo u stanje za slanje TAIL-a
+		if (write == '0') {
+			state = TAIL
+		}
+		
+		//ako je operacija pisanje, prelazimo u stanje za slanje BODY-ja 
+		else if (write == '1') {
+			state = BODY
+		}
+	}
+}
+
+if (state == BODY) {
+	
+	//prekid slanja na router iz prijasnjeg stanja
+	[OUTPUT]is_valid <= '0'
+	
+	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+		
+		//slanje body flita na router
+		[OUTPUT]noc_data <= [REGISTAR]reg_body
+		[OUTPUT]is_valid <= '1'
+		
+		state = TAIL
+	}
+}
+
+if (state == TAIL) {
+	
+	//prekid slanja na router iz prijasnjeg stanja
+	[OUTPUT]is_valid <= '0'
+	
+	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+		
+		//slanje tail flita na router
+		[OUTPUT]noc_data <= [REGISTAR]reg_tail
+		[OUTPUT]is_valid <= '1'
+		
+		state = IDLE
+	}
+}

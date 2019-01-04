@@ -1,0 +1,31 @@
+input[34] noc_data
+
+output[32] addr
+output[32] data
+output[4] pov_addr
+output read
+
+
+//ideja je da se sklop ponasa kao filtar koji instantno propusta nadopunjene podatke
+
+
+if ([INPUT]noc_data[33-32] == '10') {
+	
+	//prosljedjuemo inforamciju o vrsti transakcije (read ili write)
+	[OUTPUT]read <= [INPUT]noc_data[0]
+	//prosljedjuemo povratnu adresu
+	[OUTPUT]pov_addr <= [INPUT]noc_data[24-21]
+}
+
+if ([INPUT]noc_data[33-32] == '00') {
+	
+	//prosljedjuemo adresu pisanja
+	[OUTPUT]addr <= [INPUT]noc_data[31-0]
+}
+
+if ([INPUT]noc_data[33-32] == '01') {
+	
+	//prosljedjuemo adresu citanja ili podatak za upis
+	[OUTPUT]addr <= [INPUT]noc_data[31-0]
+	[OUTPUT]data <= [INPUT]noc_data[31-0]
+}

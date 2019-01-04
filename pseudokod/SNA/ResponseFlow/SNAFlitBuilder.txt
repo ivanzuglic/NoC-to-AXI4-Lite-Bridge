@@ -1,0 +1,51 @@
+input[32] rdata
+input rvalid
+
+input[32] bresp
+input bvalid
+
+input[#vc] is_allocatable
+input[4] pov_addr
+
+output[34] header
+output[34] tail
+
+
+//ideja je da se sklop ponasa kao filtar koji instantno propusta nadopunjene podatke
+
+
+//flit labele su konstantne
+[OUTPUT]header[33-32] <= '10'
+[OUTPUT]tail[33-32] <= '01'
+
+//nebitni bitovi
+[OUTPUT]header[20-1] <= '0'
+//adresa odredisnog node-a
+[OUTPUT]header[28-25] <= [INPUT]pov_addr
+
+if ([INPUT]rvalid == '1') {
+	
+	//spremamo podatak o vrsti transakcije i procitane podatke u flitove
+	[OUTPUT]header[0] <= '1'
+	[OUTPUT]tail[31-0] <= [INPUT]rdata
+}
+
+if ([INPUT]bvalid == '1') {
+	
+	//spremamo podatak o vrsti transakcije i write response u flitove
+	[OUTPUT]header[0] <= '0'
+	[OUTPUT]tail[31-0] <= [INPUT]bresp
+}
+
+//postavljamo id virtualnog kanala ovisno o tome koji virtualni kanal je slobodan
+switch (is_allocatable) {
+	
+	case('00000001')	[OUTPUT]header[31-29] <= '000'
+	case('00000010')	[OUTPUT]header[31-29] <= '001'
+	case('00000100')	[OUTPUT]header[31-29] <= '010'
+	case('00001000')	[OUTPUT]header[31-29] <= '011'
+	case('00010000')	[OUTPUT]header[31-29] <= '100'
+	case('00100000')	[OUTPUT]header[31-29] <= '101'
+	case('01000000')	[OUTPUT]header[31-29] <= '110'
+	case('10000000')	[OUTPUT]header[31-29] <= '111'
+}
