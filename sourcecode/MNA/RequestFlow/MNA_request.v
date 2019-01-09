@@ -46,12 +46,25 @@ reg[0:0] write;
 always@(state, awrite, avalid, is_allocatable)
 begin
     if(state == 2'b00) begin
-        if(awrite == 0 && avalid == 1 && is_allocatable == 1) begin
+        if(awrite == 0 && avalid == 1 && is_allocatable == 8'b00000000) begin
             aready <= 1;
             reg_header <= header;
             reg_tail <= tail;
             reg_alloc <= is_allocatable;
             write = 0;
+            state = 2'b01;
+        end
+        
+        if(awrite == 1 && avalid == 1 && wvalid == 1 && is_allocatable != 8'b00000000) begin
+            aready <= 1;
+            wready <= 1;
+            
+            reg_header <= header;
+            reg_body <= body;
+            reg_tail <= tail;
+            reg_alloc <= is_allocatable;
+            
+            write = 1;
             state = 2'b01;
         end
     end
@@ -84,7 +97,7 @@ begin
         end
     end
     
-    if(state == 2'b10) begin
+    if(state == 2'b11) begin
         is_valid <= 0;
         
         if(is_on_off == reg_alloc) begin
