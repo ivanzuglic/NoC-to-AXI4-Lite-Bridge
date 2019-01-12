@@ -1,8 +1,10 @@
 enum {IDLE, HEADER, BODY, TAIL} state
 
-input[34] header
-input[34] body
-input[34] tail
+// sitne promjene - flitovi sada imaju 37 bitova
+
+input[37] header
+input[37] body
+input[37] tail
 
 input avalid
 input wvalid
@@ -14,12 +16,12 @@ input[#vc] is_on_off
 output aready
 output wready
 
-output[34] noc_data
+output[37] noc_data
 output is_valid
 
-registar[34] reg_header
-registar[34] reg_body
-registar[34] reg_tail
+registar[37] reg_header
+registar[37] reg_body
+registar[37] reg_tail
 registar[#vc] reg_alloc
 
 lokalna varijabla state
@@ -31,10 +33,11 @@ lokalna varijabla write
 
 if (state == IDLE) {
 	
+	// prekid slanja na router
 	[OUTPUT]is_valid <= '0'
 	
 	//ako je operacija citanje, AXI strana je spremna za rukovanje i router ima slobodan virtualni kanal
-	if ([INPUT]awrite == '0' && [INPUT]avalid == '1' && [INPUT]is_allocatable != '0') {
+	if ([INPUT]awrite == '0' && [INPUT]avalid == '1' && [INPUT]is_allocatable != '00000000') {
 		
 		//proces AXI rukovanja za operaciju citanja
 		[OUTPUT]aready <= '1'
@@ -50,7 +53,7 @@ if (state == IDLE) {
 	}
 	
 	//ako je operacija pisanje
-	if ([INPUT]awrite == '1' && [INPUT]avalid == '1' && [INPUT]wvalid == '1' && [INPUT]is_allocatable != '0') {
+	if ([INPUT]awrite == '1' && [INPUT]avalid == '1' && [INPUT]wvalid == '1' && [INPUT]is_allocatable != '00000000') {
 		
 		//proces AXI rukovanja za operaciju pisanja
 		[OUTPUT]aready <= '1'
