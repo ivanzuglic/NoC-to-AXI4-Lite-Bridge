@@ -1,4 +1,5 @@
 // dodatan sklop koji ce procistiti zastavice is_allocatable i is_on_off - uvijek ce birati najnizi dostupan kanal
+
 // pretpostavka je da je broj virtualnih kanala = 8
 
 input[#vc] zastavice_in
