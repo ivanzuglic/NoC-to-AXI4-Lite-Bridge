@@ -1,0 +1,55 @@
+// dodatan sklop koji ce procistiti zastavice is_allocatable i is_on_off - uvijek ce birati najnizi dostupan kanal
+// pretpostavka je da je broj virtualnih kanala = 8
+
+input[#vc] zastavice_in
+
+output[#vc] zastavice_out
+
+
+//ideja je da se sklop ponasa kao filtar koji instantno propusta nadopunjene podatke
+
+
+if ([INPUT]zastavice_in[0] == '1') {
+	
+	[OUTPUT]zastavice_out <= '00000001'
+}
+
+if ([INPUT]zastavice_in[1-0] == '10') {
+	
+	[OUTPUT]zastavice_out <= '00000010'
+}
+
+if ([INPUT]zastavice_in[2-0] == '100') {
+	
+	[OUTPUT]zastavice_out <= '00000100'
+}
+
+if ([INPUT]zastavice_in[3-0] == '1000') {
+	
+	[OUTPUT]zastavice_out <= '00001000'
+}
+
+if ([INPUT]zastavice_in[4-0] == '10000') {
+	
+	[OUTPUT]zastavice_out <= '00010000'
+}
+
+if ([INPUT]zastavice_in[5-0] == '100000') {
+	
+	[OUTPUT]zastavice_out <= '00100000'
+}
+
+if ([INPUT]zastavice_in[6-0] == '1000000') {
+	
+	[OUTPUT]zastavice_out <= '01000000'
+}
+
+if ([INPUT]zastavice_in[7-0] == '10000000') {
+	
+	[OUTPUT]zastavice_out <= '10000000'
+}
+
+if ([INPUT]zastavice_in[7-0] == '00000000') {
+	
+	[OUTPUT]zastavice_out <= '00000000'
+}
