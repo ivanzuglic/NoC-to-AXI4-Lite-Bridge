@@ -1,6 +1,6 @@
-enum {IDLE, HEADER, BODY, TAIL} state
-
 // sitne promjene - flitovi sada imaju 37 bitova
+
+enum {IDLE, HEADER, BODY, TAIL} state
 
 input[37] header
 input[37] body
