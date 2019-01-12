@@ -78,7 +78,9 @@ if (state == HEADER) {
 	[OUTPUT]wready <= '0'
 	
 	//provjeravamo je li virtualni kanal na routeru koji prima ovu poruku spreman primiti flit
-	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+	
+	//BITNA PROMJENA
+	if (([INPUT]is_on_off AND [REGISTAR]reg_alloc) != '00000000') {
 		
 		//slanje head flita na router
 		[OUTPUT]noc_data <= [REGISTAR]reg_header
@@ -101,7 +103,8 @@ if (state == BODY) {
 	//prekid slanja na router iz prijasnjeg stanja
 	[OUTPUT]is_valid <= '0'
 	
-	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+	//BITNA PROMJENA
+	if (([INPUT]is_on_off AND [REGISTAR]reg_alloc) != '00000000') {
 		
 		//slanje body flita na router
 		[OUTPUT]noc_data <= [REGISTAR]reg_body
@@ -116,7 +119,8 @@ if (state == TAIL) {
 	//prekid slanja na router iz prijasnjeg stanja
 	[OUTPUT]is_valid <= '0'
 	
-	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+	//BITNA PROMJENA
+	if (([INPUT]is_on_off AND [REGISTAR]reg_alloc) != '00000000') {
 		
 		//slanje tail flita na router
 		[OUTPUT]noc_data <= [REGISTAR]reg_tail

@@ -67,7 +67,8 @@ if (state == HEADER) {
 	[OUTPUT]rready <= '0'
 	[OUTPUT]bready <= '0'
 	
-	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+	//BITNA PROMJENA
+	if (([INPUT]is_on_off AND [REGISTAR]reg_alloc) != '00000000') {
 		
 		//saljemo flit na router
 		[OUTPUT]noc_data <= [REGISTAR]reg_header
@@ -83,8 +84,8 @@ if (state == TAIL) {
 	//prekidamo slanje iz proslog stanja
 	[OUTPUT]is_valid <= '0'
 	
-	
-	if ([INPUT]is_on_off == [REGISTAR]reg_alloc) {
+	//BITNA PROMJENA
+	if (([INPUT]is_on_off AND [REGISTAR]reg_alloc) != '00000000') {
 		
 		//saljemo flit na router
 		[OUTPUT]noc_data <= [REGISTAR]reg_tail
