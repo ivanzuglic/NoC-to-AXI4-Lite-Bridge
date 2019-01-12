@@ -20,17 +20,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Mna_Response_Transmitter(rready, bready,is_valid, write, ubdata, is_allocatable , is_on_off,
+module Mna_Response_Transmitter(rready, bready,is_valid, read, ubdata, is_allocatable , is_on_off,
                                  rdata, rvalid, bresp, bvalid
     );
     input rready;
     input bready;
     input is_valid;
-    input write;
+    input read;
     input [31:0] ubdata;
     output reg [7:0] is_allocatable;
     output reg [7:0] is_on_off;
-    output reg rdata;
+    output reg [31:0]rdata;
     output reg rvalid;
     output reg [31:0] bresp;
     output reg bvalid;
@@ -51,13 +51,13 @@ module Mna_Response_Transmitter(rready, bready,is_valid, write, ubdata, is_alloc
         is_allocatable <= 8'b00000001;
         is_on_off <= 8'b00000001;
         
-        if(is_valid == 1 && write == 0) begin
+        if(is_valid == 1 && read == 0) begin
             is_allocatable <= 8'b00000000;
             is_on_off <= 8'b00000000;
             state <= WRESP1;
         end
         
-        if( is_valid == 1 && write == 1) begin
+        if( is_valid == 1 && read == 1) begin
             is_allocatable <= 8'b00000000;
             is_on_off <= 8'b00000000;
             state= RRESP1;
