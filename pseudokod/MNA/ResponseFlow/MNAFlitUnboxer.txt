@@ -1,4 +1,6 @@
-input[34] noc_data
+// sitne promjene - flitovi sada imaju 37 bitova
+
+input[37] noc_data
 
 output[32] ub_data
 output read
@@ -8,13 +10,13 @@ output read
 
 
 //ako na unboxer dodje header, propustamo samo zadnji bit koji odredjuje je li operacija bila read ili write
-if ([INPUT]noc_data[33-32] == '10') {
+if ([INPUT]noc_data[36-35] == '10') {
 	
 	[OUTPUT]read <= [INPUT]noc_data[0]
 }
 
 //ako na unboxer dodje tail, propustamo sva 32 bita payload-a
-else if ([INPUT]noc_data[33-32] == '01') {
+else if ([INPUT]noc_data[36-35] == '01') {
 	
 	[OUTPUT]ub_data <= [INPUT]noc_data[31-0]
 }
