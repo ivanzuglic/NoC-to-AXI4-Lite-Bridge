@@ -133,7 +133,7 @@ if (state == WREQ2){
 	if ([INPUT]is_valid == '1') {
 		
 		//spremamo podatke za upis u unutarnji registar
-		[REGISTAR]reg_data <= [INPUT]wdata
+		[REGISTAR]reg_data <= [INPUT]data
 		
 		//virtualni kanal 1 nije dostupan
 		[OUTPUT]is_on_off <= '00000000'
