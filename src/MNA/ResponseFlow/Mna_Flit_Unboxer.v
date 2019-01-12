@@ -20,18 +20,18 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Mna_Flit_Unboxer(noc_data, ubdata, write);
-    input [33:0] noc_data;
+module Mna_Flit_Unboxer(noc_data, ubdata, read);
+    input [36:0] noc_data;
     output reg [31:0] ubdata;
-    output reg write;
+    output reg read;
     
     always @(noc_data)
-    if(noc_data[33:32] == 2'b10) begin
-        write = noc_data[0];
+    if(noc_data[36:35] == 2'b10) begin
+        read = noc_data[0];
     end
     
     always @(noc_data)
-    if(noc_data[33:32] == 2'b01) begin
+    if(noc_data[36:35] == 2'b01) begin
         ubdata <= noc_data[31:0];
     end
      

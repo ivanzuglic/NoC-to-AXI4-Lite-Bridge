@@ -20,12 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Sna_Request_Transimtter(addr,data,write,pov_addr,is_valid,is_on_off,
-                                is_allocatable,araddr,arvalid,arready,awaddr,
-                                awvalid,awready,wdata,wvalid,wready,pov_addr_buffer);
+module Sna_Request_Transimtter(addr, data,read, pov_addr, is_valid, is_on_off,
+                                is_allocatable, araddr, arvalid, arready,awaddr,
+                                awvalid, awready, wdata, wvalid, wready, pov_addr_buffer);
     input [31:0] addr;
     input [31:0] data;
-    input write;
+    input read;
     input [3:0] pov_addr;
     input is_valid;
     output reg [7:0] is_on_off;
@@ -62,14 +62,14 @@ module Sna_Request_Transimtter(addr,data,write,pov_addr,is_valid,is_on_off,
         is_allocatable <= 8'b00000001;
         is_on_off <= 8'b00000001;
     
-        if(is_valid ==1 && write ==0) begin // mislim da tu write ide 1
+        if(is_valid ==1 && read ==0) begin
           is_allocatable <= 8'b00000000;
           is_on_off <= 8'b00000000;
           reg_pov_addr <= pov_addr;
           state<=WREQ1;
         end
         
-        if(is_valid==1 && write==1) begin // mislim da tu write ide 0
+        if(is_valid==1 && read==1) begin 
           is_allocatable <= 8'b00000000;
           is_on_off<= 8'b00000000;
           reg_pov_addr <= pov_addr;

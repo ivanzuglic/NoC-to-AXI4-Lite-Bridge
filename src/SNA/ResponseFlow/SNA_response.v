@@ -21,22 +21,22 @@
 
 
 module SNA_response(
-    input [33:0] header,
-    input [33:0] tail,
+    input [36:0] header,
+    input [36:0] tail,
     input [0:0] rvalid,
     input [0:0] bvalid,
     input [7:0] is_allocatable,
     input [7:0] is_on_off,
-    output reg [33:0] noc_data,
+    output reg [36:0] noc_data,
     output reg [0:0] is_valid,
     output reg [0:0] rready,
     output reg [0:0] bready
     );
     
 reg [1:0] state;
-reg[33:0] reg_header;
-reg[33:0] reg_tail;
-reg[7:0] reg_alloc;
+reg [36:0] reg_header;
+reg [36:0] reg_tail;
+reg [7:0] reg_alloc;
 
 always@(state, rvalid, bvalid, is_allocatable)
 begin
@@ -70,7 +70,7 @@ begin
         rready <= 0;
         bready <= 0;
         
-        if(is_on_off == reg_alloc) begin
+        if((is_on_off & reg_alloc) != 8'b00000000) begin
             noc_data <= reg_header;
             is_valid <= 1;
             
@@ -81,7 +81,7 @@ begin
      if(state == 2'b10) begin
         is_valid = 0;
         
-        if(is_on_off == reg_alloc) begin
+        if((is_on_off & reg_alloc) != 8'b00000000) begin
             noc_data <= reg_tail;
             is_valid <= 1;
             
