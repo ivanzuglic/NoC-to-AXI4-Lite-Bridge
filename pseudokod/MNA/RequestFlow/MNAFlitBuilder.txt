@@ -1,27 +1,29 @@
+// sitne promjene u nacinu slaganja flitova - vc_id ce morati biti u svakom flitu
+
 input[32] addr
 input[32] wdata
 input[#vc] is_allocatable
 input awrite
 
-output[34] header
-output[34] body
-output[34] tail
+output[37] header
+output[37] body
+output[37] tail
 
 
 //ideja je da se sklop ponasa kao filtar koji instantno propusta nadopunjene podatke
 
 
 //flit labele su konstantne
-[OUTPUT]header[33-32] <= '10'
-[OUTPUT]body[33-32] <= '00'
-[OUTPUT]tail[33-32] <= '01'
+[OUTPUT]header[36-35] <= '10'
+[OUTPUT]body[36-35] <= '00'
+[OUTPUT]tail[36-35] <= '01'
 
 //nebitni bitovi
-[OUTPUT]header[20-1] <= '0'
+[OUTPUT]header[23-1] <= '0'
 //adresa izvora (ovog node-a) zadana konstanta
-[OUTPUT]header[24-21] <= adresa_izvora
+[OUTPUT]header[27-24] <= adresa_izvora
 //adresa odredisnog node-a
-[OUTPUT]header[28-25] <= [INPUT]addr[31-28]
+[OUTPUT]header[31-28] <= [INPUT]addr[31-28]
 
 if ([INPUT]awrite == '1') {
 	
@@ -39,12 +41,35 @@ else if ([INPUT]awrite == '0') {
 //postavljamo id virtualnog kanala ovisno o tome koji virtualni kanal je slobodan
 switch (is_allocatable) {
 	
-	case('00000001')	[OUTPUT]header[31-29] <= '000'
-	case('00000010')	[OUTPUT]header[31-29] <= '001'
-	case('00000100')	[OUTPUT]header[31-29] <= '010'
-	case('00001000')	[OUTPUT]header[31-29] <= '011'
-	case('00010000')	[OUTPUT]header[31-29] <= '100'
-	case('00100000')	[OUTPUT]header[31-29] <= '101'
-	case('01000000')	[OUTPUT]header[31-29] <= '110'
-	case('10000000')	[OUTPUT]header[31-29] <= '111'
+	case('00000001')	[OUTPUT]header[34-32] <= '000'
+						[OUTPUT]body[34-32] <= '000'
+						[OUTPUT]tail[34-32] <= '000'
+	
+	case('00000010')	[OUTPUT]header[34-32] <= '001'
+						[OUTPUT]body[34-32] <= '001'
+						[OUTPUT]tail[34-32] <= '001'
+						
+	case('00000100')	[OUTPUT]header[34-32] <= '010'
+						[OUTPUT]body[34-32] <= '010'
+						[OUTPUT]tail[34-32] <= '010'
+						
+	case('00001000')	[OUTPUT]header[34-32] <= '011'
+						[OUTPUT]body[34-32] <= '011'
+						[OUTPUT]tail[34-32] <= '011'
+						
+	case('00010000')	[OUTPUT]header[34-32] <= '100'
+						[OUTPUT]body[34-32] <= '100'
+						[OUTPUT]tail[34-32] <= '100'
+						
+	case('00100000')	[OUTPUT]header[34-32] <= '101'
+						[OUTPUT]body[34-32] <= '101'
+						[OUTPUT]tail[34-32] <= '101'
+						
+	case('01000000')	[OUTPUT]header[34-32] <= '110'
+						[OUTPUT]body[34-32] <= '110'
+						[OUTPUT]tail[34-32] <= '110'
+						
+	case('10000000')	[OUTPUT]header[34-32] <= '111'
+						[OUTPUT]body[34-32] <= '111'
+						[OUTPUT]tail[34-32] <= '111'
 }

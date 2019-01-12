@@ -1,4 +1,6 @@
-input[34] noc_data
+// sitne promjene - flittovi sada imaju 37 bitova
+
+input[37] noc_data
 
 output[32] addr
 output[32] data
@@ -9,21 +11,21 @@ output read
 //ideja je da se sklop ponasa kao filtar koji instantno propusta nadopunjene podatke
 
 
-if ([INPUT]noc_data[33-32] == '10') {
+if ([INPUT]noc_data[36-35] == '10') {
 	
 	//prosljedjuemo inforamciju o vrsti transakcije (read ili write)
 	[OUTPUT]read <= [INPUT]noc_data[0]
 	//prosljedjuemo povratnu adresu
-	[OUTPUT]pov_addr <= [INPUT]noc_data[24-21]
+	[OUTPUT]pov_addr <= [INPUT]noc_data[27-24]
 }
 
-if ([INPUT]noc_data[33-32] == '00') {
+if ([INPUT]noc_data[36-35] == '00') {
 	
 	//prosljedjuemo adresu pisanja
 	[OUTPUT]addr <= [INPUT]noc_data[31-0]
 }
 
-if ([INPUT]noc_data[33-32] == '01') {
+if ([INPUT]noc_data[36-35] == '01') {
 	
 	//prosljedjuemo adresu citanja ili podatak za upis
 	[OUTPUT]addr <= [INPUT]noc_data[31-0]

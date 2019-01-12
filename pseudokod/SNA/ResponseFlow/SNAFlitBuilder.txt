@@ -1,3 +1,5 @@
+// sitne promjene - flitovi sada imaju 37 bitova, vc_id mora biti u svakom flitu
+
 input[32] rdata
 input rvalid
 
@@ -7,21 +9,21 @@ input bvalid
 input[#vc] is_allocatable
 input[4] pov_addr
 
-output[34] header
-output[34] tail
+output[37] header
+output[37] tail
 
 
 //ideja je da se sklop ponasa kao filtar koji instantno propusta nadopunjene podatke
 
 
 //flit labele su konstantne
-[OUTPUT]header[33-32] <= '10'
-[OUTPUT]tail[33-32] <= '01'
+[OUTPUT]header[36-35] <= '10'
+[OUTPUT]tail[36-35] <= '01'
 
 //nebitni bitovi
-[OUTPUT]header[20-1] <= '0'
+[OUTPUT]header[27-1] <= '0'
 //adresa odredisnog node-a
-[OUTPUT]header[28-25] <= [INPUT]pov_addr
+[OUTPUT]header[31-28] <= [INPUT]pov_addr
 
 if ([INPUT]rvalid == '1') {
 	
@@ -40,12 +42,27 @@ if ([INPUT]bvalid == '1') {
 //postavljamo id virtualnog kanala ovisno o tome koji virtualni kanal je slobodan
 switch (is_allocatable) {
 	
-	case('00000001')	[OUTPUT]header[31-29] <= '000'
-	case('00000010')	[OUTPUT]header[31-29] <= '001'
-	case('00000100')	[OUTPUT]header[31-29] <= '010'
-	case('00001000')	[OUTPUT]header[31-29] <= '011'
-	case('00010000')	[OUTPUT]header[31-29] <= '100'
-	case('00100000')	[OUTPUT]header[31-29] <= '101'
-	case('01000000')	[OUTPUT]header[31-29] <= '110'
-	case('10000000')	[OUTPUT]header[31-29] <= '111'
+	case('00000001')	[OUTPUT]header[34-32] <= '000'
+						[OUTPUT]tail[34-32] <= '000'
+	
+	case('00000010')	[OUTPUT]header[34-32] <= '001'
+						[OUTPUT]tail[34-32] <= '001'
+						
+	case('00000100')	[OUTPUT]header[34-32] <= '010'
+						[OUTPUT]tail[34-32] <= '010'
+						
+	case('00001000')	[OUTPUT]header[34-32] <= '011'
+						[OUTPUT]tail[34-32] <= '011'
+						
+	case('00010000')	[OUTPUT]header[34-32] <= '100'
+						[OUTPUT]tail[34-32] <= '100'
+						
+	case('00100000')	[OUTPUT]header[34-32] <= '101'
+						[OUTPUT]tail[34-32] <= '101'
+						
+	case('01000000')	[OUTPUT]header[34-32] <= '110'
+						[OUTPUT]tail[34-32] <= '110'
+						
+	case('10000000')	[OUTPUT]header[34-32] <= '111'
+						[OUTPUT]tail[34-32] <= '111'
 }
