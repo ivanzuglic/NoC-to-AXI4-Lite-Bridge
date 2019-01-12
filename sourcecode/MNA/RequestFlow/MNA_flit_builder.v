@@ -25,18 +25,18 @@ module MNA_flit_builder#(localparam adresa_izvora = 4'b0001)(
     input [0:0] awrite,
     input [31:0] wdata,
     input [0:0] is_allocatable,
-    output reg [33:0] header,
-    output reg [33:0] body,
-    output reg [33:0] tail
+    output reg [36:0] header,
+    output reg [36:0] body,
+    output reg [36:0] tail
     );
     
 initial begin
-    header[33:32] = 2'b10;
-    header[20:1] = 0;
-    header[24:21] = adresa_izvora;
-    header[28:25] = addr[31:28];
-    body[33:32] = 2'b00;
-    tail[33:32] = 2'b01;
+    header[36:35] = 2'b10;
+    header[23:1] = 0;
+    header[27:24] = adresa_izvora;
+    header[31:28] = addr[31:28];
+    body[36:35] = 2'b00;
+    tail[36:35] = 2'b01;
 end
 
 always@(awrite)
@@ -56,14 +56,54 @@ end
 always@(awrite)
 begin
 case(is_allocatable)
-    8'b00000001: header[31:29] = 3'b000;
-    8'b00000010: header[31:29] = 3'b001;
-    8'b00000100: header[31:29] = 3'b010;
-    8'b00001000: header[31:29] = 3'b011;
-    8'b00010000: header[31:29] = 3'b100;
-    8'b00100000: header[31:29] = 3'b101;
-    8'b01000000: header[31:29] = 3'b110;
-    8'b10000000: header[31:29] = 3'b111;
+    8'b00000001: begin
+        header[34:32] = 3'b000;
+        body[34:32] = 3'b000;
+        tail[34:32] = 3'b000;
+    end
+    
+    8'b00000010: begin
+        header[34:32] = 3'b001;
+        body[34:32] = 3'b001;
+        tail[34:32] = 3'b001;
+    end
+    
+    8'b00000100: begin
+        header[34:32] = 3'b010;
+        body[34:32] = 3'b010;
+        tail[34:32] = 3'b010;
+    end
+    
+    8'b00001000: begin
+        header[34:32] = 3'b011;
+        body[34:32] = 3'b011;
+        tail[34:32] = 3'b011;
+    end
+    
+    8'b00010000: begin
+        header[34:32] = 3'b100;
+        body[34:32] = 3'b100;
+        tail[34:32] = 3'b100;
+    end
+    
+    8'b00100000: begin
+        header[34:32] = 3'b101;
+        body[34:32] = 3'b101;
+        tail[34:32] = 3'b101;
+    end
+    
+    8'b01000000: begin
+        header[34:32] = 3'b110;
+        body[34:32] = 3'b110;
+        tail[34:32] = 3'b110;
+    end
+    
+    8'b10000000: begin
+        header[34:32] = 3'b111;
+        body[34:32] = 3'b111;
+        tail[34:32] = 3'b111;
+    end
+    
 endcase
 end
     
