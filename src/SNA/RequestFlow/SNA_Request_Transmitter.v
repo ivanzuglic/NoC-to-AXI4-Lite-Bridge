@@ -20,9 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Sna_Request_Transimtter(addr, data,read, pov_addr, is_valid, is_on_off,
+module Sna_Request_Transimtter(clock,addr, data,read, pov_addr, is_valid, is_on_off,
                                 is_allocatable, araddr, arvalid, arready,awaddr,
                                 awvalid, awready, wdata, wvalid, wready, pov_addr_buffer);
+    input clock;
     input [31:0] addr;
     input [31:0] data;
     input read;
@@ -54,18 +55,24 @@ module Sna_Request_Transimtter(addr, data,read, pov_addr, is_valid, is_on_off,
     parameter RREQ1 = 3'b100;
     parameter RREQ2 = 3'b101;
     
-    always @(state)
+    always @(clock) begin
     if(state == IDLE) begin 
         arvalid <= 0;
         awvalid <= 0;
         wvalid <= 0;
         is_allocatable <= 8'b00000001;
         is_on_off <= 8'b00000001;
+        repeat (1) begin  
+            @(clock);
+            end
     
         if(is_valid ==1 && read ==0) begin
           is_allocatable <= 8'b00000000;
           is_on_off <= 8'b00000000;
           reg_pov_addr <= pov_addr;
+          repeat (1) begin  
+            @(clock);
+            end
           state<=WREQ1;
         end
         
@@ -73,31 +80,43 @@ module Sna_Request_Transimtter(addr, data,read, pov_addr, is_valid, is_on_off,
           is_allocatable <= 8'b00000000;
           is_on_off<= 8'b00000000;
           reg_pov_addr <= pov_addr;
+          repeat (1) begin  
+            @(clock);
+            end
           state<=RREQ1;
         end
    end
    
-   always @(state)
    if(state == WREQ1) begin
         is_on_off <= 8'b00000001;
+        repeat (1) begin  
+            @(clock);
+            end
         if(is_valid == 1) begin
             reg_addr <= addr;
             is_on_off <= 8'b00000000;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= WREQ2;
             end 
     end
     
-    always @(state)
     if(state== WREQ2) begin
         is_on_off <= 8'b00000001;
+        repeat (1) begin  
+            @(clock);
+            end
         if(is_valid==1) begin
             reg_data <= data;
             is_on_off <= 8'b00000000;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= WREQ3;
         end
     end
-    
-    always@(state)
+   
     if(state==WREQ3) begin
         if(awready == 1 && wready == 1) begin
             pov_addr_buffer <= reg_pov_addr;
@@ -105,28 +124,38 @@ module Sna_Request_Transimtter(addr, data,read, pov_addr, is_valid, is_on_off,
             awvalid <= 1;
             wdata <= reg_data;
             wvalid <=1;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= IDLE;
         end
     end
     
-    always @(state)
     if(state== RREQ1) begin
         is_on_off <=8'b00000001;
+        repeat (1) begin  
+            @(clock);
+            end
         if(is_valid == 1) begin
             reg_addr <= addr;
             is_on_off <= 8'b00000000;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= RREQ2;
         end
     end
     
-    always @(state)
     if(state== RREQ2) begin
         if(arready == 1) begin
             pov_addr_buffer <= reg_pov_addr;
             araddr <= reg_addr;
             arvalid <= 1;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= IDLE;
         end
     end
-    
+ end 
 endmodule

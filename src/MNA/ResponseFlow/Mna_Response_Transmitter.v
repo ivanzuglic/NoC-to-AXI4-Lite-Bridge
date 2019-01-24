@@ -20,9 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Mna_Response_Transmitter(rready, bready,is_valid, read, ubdata, is_allocatable , is_on_off,
+module Mna_Response_Transmitter(clock, rready, bready,is_valid, read, ubdata, is_allocatable , is_on_off,
                                  rdata, rvalid, bresp, bvalid
     );
+    input clock;
     input rready;
     input bready;
     input is_valid;
@@ -44,62 +45,90 @@ module Mna_Response_Transmitter(rready, bready,is_valid, read, ubdata, is_alloca
     parameter RRESP1 = 3'b100;
     parameter RRESP2 = 3'b101;
     
-    always @(state) 
+    always @(clock) begin
     if(state == IDLE) begin
         bvalid <= 0;  
         rvalid <= 0;
         is_allocatable <= 8'b00000001;
         is_on_off <= 8'b00000001;
+        repeat (1) begin  
+            @(clock);
+            end
+       
         
         if(is_valid == 1 && read == 0) begin
             is_allocatable <= 8'b00000000;
             is_on_off <= 8'b00000000;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= WRESP1;
         end
         
         if( is_valid == 1 && read == 1) begin
             is_allocatable <= 8'b00000000;
             is_on_off <= 8'b00000000;
+            repeat (1) begin  
+            @(clock);
+            end
             state= RRESP1;
         end
     end
     
-    always @(state)
+   
     if(state == WRESP1) begin
         is_on_off <= 8'b00000001;
+        repeat (1) begin  
+            @(clock);
+            end
         if(is_valid == 1) begin
             data <= ubdata;
             is_on_off <= 8'b00000000;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= WRESP2;
         end
     end
     
-    always @(state)
+   
     if(state == WRESP2) begin
         if(bready == 1) begin
             bresp <= data;
             bvalid <= 1;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= IDLE;
         end
     end
     
-    always @(state)
+ 
     if(state == RRESP1) begin
         is_on_off <= 8'b00000001;
+        repeat (1) begin  
+            @(clock);
+            end
         if(is_valid == 1) begin
             data <= ubdata;
             is_on_off <= 8'b00000000;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= RRESP2;
         end
     end
     
-    always @(state)
+ 
     if(state == RRESP2)begin
         if(rready== 1) begin
             rdata <= data;
             rvalid <= 1;
+            repeat (1) begin  
+            @(clock);
+            end
             state <= IDLE;
         end
     end
-    
+end
 endmodule

@@ -28,14 +28,15 @@ module SNA_flit_builder(
     input [7:0] is_allocatable,
     input [3:0] pov_addr,
     output reg [36:0] header,
-    output reg [36:0] tail
+    output reg [36:0] tail,
+    output reg [36:0] body
     );
     
 initial begin
-    header[36:32] = 2'b10;
-    tail[36:32] = 2'b01;
+    header[36:35] = 2'b10;
+    tail[36:35] = 2'b01;
     header[27:1] = 0;
-    header[31:28] = pov_addr;
+    
 end
 
 always@(rvalid, bvalid, is_allocatable)
@@ -43,11 +44,13 @@ begin
     if(rvalid == 1) begin
         header[0:0] <= 1;
         tail[31:0] <= rdata;
+        header[31:28] <= pov_addr;
     end
     
     if(bvalid == 1) begin
         header[0:0] <= 0;
         tail[31:0] <= bresp;
+        header[31:28] <= pov_addr;
     end
 end
 
